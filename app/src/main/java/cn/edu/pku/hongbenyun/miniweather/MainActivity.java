@@ -306,7 +306,7 @@ public class MainActivity extends Activity implements View.OnClickListener
     }
 
     void updateTodayWeather(TodayWeather todayWeather){
-        int pm25;
+        int pm25 = 0;
 
         city_name_Tv.setText(todayWeather.getCity()+"天气");
         cityTv.setText(todayWeather.getCity());
@@ -319,7 +319,8 @@ public class MainActivity extends Activity implements View.OnClickListener
         climateTv.setText(todayWeather.getType());
         windTv.setText("风力:"+todayWeather.getFengli());
 
-        pm25 = Integer.parseInt(todayWeather.getPm25());
+        if(todayWeather.getPm25()!=null)
+            pm25 = Integer.parseInt(todayWeather.getPm25());
         if (pm25 >= 0)
         {
             if (pm25 < 51)
@@ -335,8 +336,8 @@ public class MainActivity extends Activity implements View.OnClickListener
             else if (pm25 > 300)
                 pmImg.setImageResource(R.drawable.biz_plugin_weather_greater_300);
         }
-
-        weatherImg.setImageResource(weatherMap.get(todayWeather.getType()));
+        if(todayWeather.getType()!=null)
+            weatherImg.setImageResource(weatherMap.get(todayWeather.getType()));
         Toast.makeText(MainActivity.this,"更新成功！",Toast.LENGTH_SHORT).show();
 
     }
