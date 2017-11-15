@@ -11,6 +11,7 @@ import cn.edu.pku.hongbenyun.bean.City;
 
 /**
  * Created by Mike_Hong on 2017/10/25.
+ * 读取数据库文件中的城市信息
  */
 
 public class CityDB {

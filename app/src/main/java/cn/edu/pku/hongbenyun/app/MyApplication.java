@@ -16,6 +16,7 @@ import cn.edu.pku.hongbenyun.db.CityDB;
 
 /**
  * Created by Mike_Hong on 2017/10/25.
+ * 调用CityDB读取所有城市的网络连接信息
  */
 
 public class MyApplication extends Application {

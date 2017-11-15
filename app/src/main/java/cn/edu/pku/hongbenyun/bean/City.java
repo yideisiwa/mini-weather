@@ -2,6 +2,7 @@ package cn.edu.pku.hongbenyun.bean;
 
 /**
  * Created by Mike_Hong on 2017/10/25.
+ * 城市信息数据
  */
 
 public class City {

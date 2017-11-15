@@ -7,6 +7,7 @@ import android.net.NetworkInfo;
 
 /**
  * Created by Mike_Hong on 2017/10/11.
+ * 检测当前网络状态
  */
 
 public class NetUtil {

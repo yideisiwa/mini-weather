@@ -2,6 +2,7 @@ package cn.edu.pku.hongbenyun.bean;
 
 /**
  * Created by Mike_Hong on 2017/10/11.
+ * 显示在界面上的城市天气信息
  */
 
 public class TodayWeather {

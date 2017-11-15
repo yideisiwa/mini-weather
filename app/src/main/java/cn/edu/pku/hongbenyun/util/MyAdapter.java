@@ -14,10 +14,13 @@ import cn.edu.pku.hongbenyun.miniweather.R;
 
 /**
  * Created by Mike_Hong on 2017/10/25.
+ * 自定义的选择城市界面ListView的适配器
  */
 
 public class MyAdapter extends BaseAdapter {
+    //保存城市信息的列表
     private List<City> mCityList;
+    //上下文信息
     private Context context;
     public MyAdapter(List<City> mCityList,Context context) {
         this.mCityList = mCityList;
@@ -46,5 +49,11 @@ public class MyAdapter extends BaseAdapter {
         TextView city_name_Tv= (TextView) view.findViewById(R.id.city_name);
         city_name_Tv.setText(city.getCity());
         return view;
+    }
+
+    public void updateCityList(List<City> list)
+    {
+        mCityList = list;
+        notifyDataSetChanged();
     }
 }

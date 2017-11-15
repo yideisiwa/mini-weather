@@ -10,6 +10,7 @@ import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
 
+import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -34,12 +35,14 @@ public class MainActivity extends Activity implements View.OnClickListener
 {
     private static final int UPDATE_TODAY_WEATHER = 1;
 
+    private ProgressBar progressBar;
     private ImageView mUpdateBtn;
     private ImageView mCitySelect;
     private TextView cityTv, timeTv, humidityTv, weekTv, pmDataTv, pmQualityTv,
             temperatureTv, climateTv, windTv, city_name_Tv;
     private ImageView weatherImg, pmImg;
 
+    //实现天气文字与图片的对应
     private final  static Map<String, Integer> weatherMap = new HashMap<String, Integer>();
     static {
         weatherMap.put("暴雪", R.drawable.biz_plugin_weather_baoxue);
@@ -64,11 +67,14 @@ public class MainActivity extends Activity implements View.OnClickListener
         weatherMap.put("中雨", R.drawable.biz_plugin_weather_zhongyu);
     }
 
+    //处理其他线程返回的数据
     private Handler mHandler = new Handler() {
         public void handleMessage(android.os.Message msg) {
             switch (msg.what) {
                 case UPDATE_TODAY_WEATHER:
                     updateTodayWeather((TodayWeather) msg.obj);
+                    mUpdateBtn.setVisibility(View.VISIBLE);
+                    progressBar.setVisibility(View.GONE);
                     break;
                 default:
                     break;
@@ -82,14 +88,17 @@ public class MainActivity extends Activity implements View.OnClickListener
         super.onCreate(savedInstanceState);
         setContentView(R.layout.weather_info);
 
+        progressBar =(ProgressBar)findViewById(R.id.title_update_progress);
         mUpdateBtn = (ImageView) findViewById(R.id.title_update_btn);
         mUpdateBtn.setOnClickListener(this);
 
         mCitySelect = (ImageView)findViewById(R.id.title_city_manager);
         mCitySelect.setOnClickListener(this);
 
+        //初始化各类控件
         initView();
 
+        //从sharedPreference中读取保存的城市，更新当前城市天气
         getAndUpdateTodayWeather();
     }
 
@@ -98,6 +107,7 @@ public class MainActivity extends Activity implements View.OnClickListener
             String newCityCode= data.getStringExtra("cityCode");
             Log.d("myWeather", "选择的城市代码为"+newCityCode);
             if (NetUtil.getNetworkState(this) != NetUtil.NETWORN_NONE) {
+                //选择城市后返回到显示天气界面，请求网络数据更新界面，并更新sharePreference
                 Log.d("myWeather", "网络OK");
                 queryWeatherCode(newCityCode);
                 SharedPreferences settings
@@ -116,11 +126,13 @@ public class MainActivity extends Activity implements View.OnClickListener
     public void onClick(View view) {
         if (view.getId() == R.id.title_city_manager)
         {
+            //点击选择城市按钮，跳转到选择城市界面
             Intent i = new Intent(this, SelectCity.class);
             i.putExtra("cityName",cityTv.getText());
             startActivityForResult(i,1);
         }
         if (view.getId() == R.id.title_update_btn){
+            //点击更新城市按钮，更新城市天气
             getAndUpdateTodayWeather();
         }
     }
@@ -149,12 +161,16 @@ public class MainActivity extends Activity implements View.OnClickListener
     private void queryWeatherCode(String cityCode)  {
         final String address = "http://wthrcdn.etouch.cn/WeatherApi?citykey=" + cityCode;
         Log.d("myWeather", address);
+        mUpdateBtn.setVisibility(View.GONE);
+        progressBar.setVisibility(View.VISIBLE);
+        //创建新线程进行网络操作，防止阻塞主线程
         new Thread(new Runnable() {
             @Override
             public void run() {
                 HttpURLConnection con=null;
                 TodayWeather todayWeather = null;
                 try{
+                    //发起请求，获取网络数据保存到response中
                     URL url = new URL(address);
                     con = (HttpURLConnection)url.openConnection();
                     con.setRequestMethod("GET");
@@ -168,16 +184,20 @@ public class MainActivity extends Activity implements View.OnClickListener
                         response.append(str);
                         Log.d("myWeather", str);
                     }
+
                     String responseStr=response.toString();
                     Log.d("myWeather", responseStr);
 
+                    //解析从网络获取的response字符串，获取自己想要的天气数据保存。
                     todayWeather = parseXML(responseStr);
                     if (todayWeather != null) {
+                        //向主线程发送信息
                         Log.d("myWeather", todayWeather.toString());
                         Message msg =new Message();
                         msg.what = UPDATE_TODAY_WEATHER;
                         msg.obj=todayWeather;
-                        mHandler.sendMessage(msg);
+                        //mHandler.sendMessage(msg);
+                        mHandler.sendMessageDelayed(msg,2000);
                     }
                 }catch (Exception e){
                     e.printStackTrace();
