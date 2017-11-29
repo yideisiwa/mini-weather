@@ -1,5 +1,7 @@
 package cn.edu.pku.hongbenyun.bean;
 
+import java.util.List;
+
 /**
  * Created by Mike_Hong on 2017/10/11.
  * 显示在界面上的城市天气信息
@@ -18,6 +20,8 @@ public class TodayWeather {
     private String high;
     private String low;
     private String type;
+
+    private List<Weather> weathers;
 
     public String getCity() {
         return city;
@@ -113,6 +117,14 @@ public class TodayWeather {
 
     public void setType(String type) {
         this.type = type;
+    }
+
+    public List<Weather> getWeathers() {
+        return weathers;
+    }
+
+    public void setWeathers(List<Weather> weathers) {
+        this.weathers = weathers;
     }
 
     @Override
