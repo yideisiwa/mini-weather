@@ -1,5 +1,6 @@
 package cn.edu.pku.hongbenyun.bean;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -21,7 +22,9 @@ public class TodayWeather {
     private String low;
     private String type;
 
-    private List<Weather> weathers;
+    private List<Weather> weathers = new ArrayList<>();
+
+
 
     public String getCity() {
         return city;

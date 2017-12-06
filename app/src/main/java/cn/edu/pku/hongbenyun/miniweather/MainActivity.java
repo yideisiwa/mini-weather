@@ -1,10 +1,17 @@
 package cn.edu.pku.hongbenyun.miniweather;
 
 import android.app.Activity;
+import android.app.Service;
+import android.content.ComponentName;
+import android.content.Context;
 import android.content.Intent;
+import android.content.ServiceConnection;
 import android.content.SharedPreferences;
+import android.os.AsyncTask;
+import android.os.Binder;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.IBinder;
 import android.os.Message;
 import android.support.v4.view.ViewPager;
 import android.util.Log;
@@ -27,11 +34,13 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.StringReader;
 import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Timer;
 
 import cn.edu.pku.hongbenyun.bean.City;
 import cn.edu.pku.hongbenyun.bean.TodayWeather;
@@ -59,6 +68,8 @@ public class MainActivity extends Activity implements View.OnClickListener, View
     private ImageView[] dots;
     private int[] ids = {R.id.iv1,R.id.iv2};
 
+    private String cityCode;
+
     //实现天气文字与图片的对应
     private final  static Map<String, Integer> weatherMap = new HashMap<String, Integer>();
     static {
@@ -85,20 +96,29 @@ public class MainActivity extends Activity implements View.OnClickListener, View
     }
 
     //处理其他线程返回的数据
-    private Handler mHandler = new Handler() {
-        public void handleMessage(android.os.Message msg) {
+    public static MyHandler mHandler;
+
+
+    class MyHandler extends Handler{
+
+        @Override
+        public void handleMessage(Message msg) {
             switch (msg.what) {
                 case UPDATE_TODAY_WEATHER:
                     updateTodayWeather((TodayWeather) msg.obj);
                     mUpdateBtn.setVisibility(View.VISIBLE);
                     progressBar.setVisibility(View.GONE);
                     break;
+                case 2:
+                    queryWeatherCode(cityCode);
+                    break;
                 default:
                     break;
             }
+
         }
 
-    };
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -112,6 +132,7 @@ public class MainActivity extends Activity implements View.OnClickListener, View
         mCitySelect = (ImageView)findViewById(R.id.title_city_manager);
         mCitySelect.setOnClickListener(this);
 
+        mHandler = new MyHandler();
 
         //初始化各类控件
         initView();
@@ -119,11 +140,15 @@ public class MainActivity extends Activity implements View.OnClickListener, View
         initDots();
         //从sharedPreference中读取保存的城市，更新当前城市天气
         getAndUpdateTodayWeather();
+
+        Intent i = new Intent(MainActivity.this, MyService.class);
+        bindService(i, connection, Context.BIND_AUTO_CREATE);
     }
 
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         if (requestCode == 1 && resultCode == RESULT_OK) {
             String newCityCode= data.getStringExtra("cityCode");
+            cityCode = newCityCode;
             Log.d("myWeather", "选择的城市代码为"+newCityCode);
             if (NetUtil.getNetworkState(this) != NetUtil.NETWORN_NONE) {
                 //选择城市后返回到显示天气界面，请求网络数据更新界面，并更新sharePreference
@@ -160,6 +185,7 @@ public class MainActivity extends Activity implements View.OnClickListener, View
     {
         SharedPreferences sharedPreferences = getSharedPreferences("config", MODE_PRIVATE);
         String cityCode = sharedPreferences.getString("main_city_code","101010100");
+        this.cityCode = cityCode;
         Log.d("myWeather",cityCode);
 
 
@@ -303,8 +329,6 @@ public class MainActivity extends Activity implements View.OnClickListener, View
                                 eventType = xmlPullParser.next();
                                 todayWeather.setType(xmlPullParser.getText());
                                 typeCount++;
-                            }else if(xmlPullParser.getName().equals("forecast")) {
-                                todayWeather.setWeathers(new ArrayList<Weather>());
                             }else if(xmlPullParser.getName().equals("weather")){
                                 if(weatherCount ==0)
                                     weatherCount++;
@@ -398,8 +422,8 @@ public class MainActivity extends Activity implements View.OnClickListener, View
         cityTv.setText(todayWeather.getCity());
         timeTv.setText(todayWeather.getUpdatetime()+ "发布");
         humidityTv.setText("湿度："+todayWeather.getShidu());
-        pmDataTv.setText(todayWeather.getPm25());
-        pmQualityTv.setText(todayWeather.getQuality());
+        pmDataTv.setText(todayWeather.getPm25()==null?"N/A":todayWeather.getPm25());
+        pmQualityTv.setText(todayWeather.getQuality()==null?"N/A":todayWeather.getQuality());
         weekTv.setText(todayWeather.getDate());
         temperatureTv.setText(todayWeather.getHigh()+"~"+todayWeather.getLow());
         climateTv.setText(todayWeather.getType());
@@ -428,11 +452,10 @@ public class MainActivity extends Activity implements View.OnClickListener, View
         //更新未来六天天气界面
         linearLayout1.removeAllViews();
         linearLayout2.removeAllViews();
-        for(int i=0;i<todayWeather.getWeathers().size() && i<3;i++)
+        for(int i=0;i<todayWeather.getWeathers().size() && i<2;i++)
         {
             Weather weather=todayWeather.getWeathers().get(i);
             View view= LayoutInflater.from(this).inflate(R.layout.weather_page_item, null);
-            linearLayout1.addView(view);
 
             TextView dateTv = (TextView)view.findViewById(R.id.date);
             TextView temperatureTv = (TextView)view.findViewById(R.id.temperature);
@@ -440,19 +463,21 @@ public class MainActivity extends Activity implements View.OnClickListener, View
             TextView windTv = (TextView)view.findViewById(R.id.wind);
             ImageView weatherImg = (ImageView) view.findViewById(R.id.weather_img);
 
-            dateTv.setText(weather.getDate());
-            temperatureTv.setText(weather.getHigh()+"~"+weather.getLow());
-            climateTv.setText(weather.getType());
-            windTv.setText(weather.getFengli());
+            dateTv.setText(weather.getDate()==null?"null":weather.getDate());
+            temperatureTv.setText((weather.getHigh()==null?"null":weather.getHigh())+"~"+(weather.getLow()==null?"null":weather.getLow()));
+            climateTv.setText(weather.getType()==null?"null":weather.getType());
+            windTv.setText(weather.getFengli()==null?"null":weather.getFengli());
             if(weather.getType()!=null)
                 weatherImg.setImageResource(weatherMap.get(weather.getType()));
+            else
+                weatherImg.setImageResource(weatherMap.get(weather.getType()));
+            linearLayout1.addView(view);
         }
 
-        for(int i=3;i<todayWeather.getWeathers().size() && i<6;i++)
+        for(int i=2;i<todayWeather.getWeathers().size() && i<4;i++)
         {
             Weather weather=todayWeather.getWeathers().get(i);
             View view= LayoutInflater.from(this).inflate(R.layout.weather_page_item, null);
-            linearLayout2.addView(view);
 
             TextView dateTv = (TextView)view.findViewById(R.id.date);
             TextView temperatureTv = (TextView)view.findViewById(R.id.temperature);
@@ -466,7 +491,9 @@ public class MainActivity extends Activity implements View.OnClickListener, View
             windTv.setText(weather.getFengli());
             Log.d("qqq",weather.getFengli());
             if(weather.getType()!=null)
-                weatherImg.setImageResource(weatherMap.get(weather.getType()));
+                weatherImg.setImageResource(weatherMap.get("晴"));
+
+            linearLayout2.addView(view);
         }
 
 
@@ -521,4 +548,22 @@ public class MainActivity extends Activity implements View.OnClickListener, View
     public void onPageScrollStateChanged(int state) {
 
     }
+
+    private MyService mBoundService;
+
+    private ServiceConnection connection = new ServiceConnection() {
+        public void onServiceConnected(ComponentName className, IBinder service) {
+            mBoundService = ((MyService.MyBinder) service).getService();
+
+            // Tell the user about this for our demo.
+            Toast.makeText(MainActivity.this, "connected",
+                    Toast.LENGTH_SHORT).show();
+        }
+
+        public void onServiceDisconnected(ComponentName className) {
+            mBoundService = null;
+            Toast.makeText(MainActivity.this, "connected",
+                    Toast.LENGTH_SHORT).show();
+        }
+    };
 }
