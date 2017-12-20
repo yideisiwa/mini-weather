@@ -109,9 +109,9 @@ public class MainActivity extends Activity implements View.OnClickListener, View
                     mUpdateBtn.setVisibility(View.VISIBLE);
                     progressBar.setVisibility(View.GONE);
                     break;
-                case 2:
-                    queryWeatherCode(cityCode);
-                    break;
+//                case 2:
+//                    queryWeatherCode(cityCode);
+//                    break;
                 default:
                     break;
             }
@@ -149,10 +149,13 @@ public class MainActivity extends Activity implements View.OnClickListener, View
         if (requestCode == 1 && resultCode == RESULT_OK) {
             String newCityCode= data.getStringExtra("cityCode");
             cityCode = newCityCode;
+            mBoundService.cityCode = cityCode;
             Log.d("myWeather", "选择的城市代码为"+newCityCode);
             if (NetUtil.getNetworkState(this) != NetUtil.NETWORN_NONE) {
                 //选择城市后返回到显示天气界面，请求网络数据更新界面，并更新sharePreference
                 Log.d("myWeather", "网络OK");
+                mUpdateBtn.setVisibility(View.GONE);
+                progressBar.setVisibility(View.VISIBLE);
                 queryWeatherCode(newCityCode);
                 SharedPreferences settings
                         = (SharedPreferences)getSharedPreferences("config", MODE_PRIVATE);
@@ -191,6 +194,8 @@ public class MainActivity extends Activity implements View.OnClickListener, View
 
         if (NetUtil.getNetworkState(this) != NetUtil.NETWORN_NONE) {
             Log.d("myWeather", "网络OK");
+            mUpdateBtn.setVisibility(View.GONE);
+            progressBar.setVisibility(View.VISIBLE);
             queryWeatherCode(cityCode);
         }else
         {
@@ -206,8 +211,6 @@ public class MainActivity extends Activity implements View.OnClickListener, View
     private void queryWeatherCode(String cityCode)  {
         final String address = "http://wthrcdn.etouch.cn/WeatherApi?citykey=" + cityCode;
         Log.d("myWeather", address);
-        mUpdateBtn.setVisibility(View.GONE);
-        progressBar.setVisibility(View.VISIBLE);
         //创建新线程进行网络操作，防止阻塞主线程
         new Thread(new Runnable() {
             @Override
@@ -554,7 +557,7 @@ public class MainActivity extends Activity implements View.OnClickListener, View
     private ServiceConnection connection = new ServiceConnection() {
         public void onServiceConnected(ComponentName className, IBinder service) {
             mBoundService = ((MyService.MyBinder) service).getService();
-
+            mBoundService.cityCode = cityCode;
             // Tell the user about this for our demo.
             Toast.makeText(MainActivity.this, "connected",
                     Toast.LENGTH_SHORT).show();
