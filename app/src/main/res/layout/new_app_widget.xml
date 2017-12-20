@@ -1,0 +1,24 @@
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:layout_gravity="center_vertical"
+    android:padding="5dp"
+    android:gravity="center_horizontal"
+    android:background="@drawable/biz_plugin_weather_shenzhen_bg">
+
+    <ImageView
+        android:id="@+id/weather_img"
+        android:layout_width="30dp"
+        android:layout_height="30dp"
+        android:src="@drawable/biz_plugin_weather_qing"/>
+    <TextView
+        android:id="@+id/temperature"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="-2℃~7℃"
+        android:textColor="@android:color/white"
+        android:textSize="10dp" />
+
+</LinearLayout>

@@ -501,7 +501,7 @@ public class MainActivity extends Activity implements View.OnClickListener, View
 
 
 
-        Toast.makeText(MainActivity.this,"更新成功！",Toast.LENGTH_SHORT).show();
+        //Toast.makeText(MainActivity.this,"更新成功！",Toast.LENGTH_SHORT).show();
 
     }
 
@@ -559,14 +559,14 @@ public class MainActivity extends Activity implements View.OnClickListener, View
             mBoundService = ((MyService.MyBinder) service).getService();
             mBoundService.cityCode = cityCode;
             // Tell the user about this for our demo.
-            Toast.makeText(MainActivity.this, "connected",
-                    Toast.LENGTH_SHORT).show();
+//            Toast.makeText(MainActivity.this, "connected",
+//                    Toast.LENGTH_SHORT).show();
         }
 
         public void onServiceDisconnected(ComponentName className) {
             mBoundService = null;
-            Toast.makeText(MainActivity.this, "connected",
-                    Toast.LENGTH_SHORT).show();
+//            Toast.makeText(MainActivity.this, "connected",
+//                    Toast.LENGTH_SHORT).show();
         }
     };
 }
