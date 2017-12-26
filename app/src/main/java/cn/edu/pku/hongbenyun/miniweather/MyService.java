@@ -121,10 +121,10 @@ public class MyService extends Service {
                         msg.what = UPDATE_TODAY_WEATHER;
                         msg.obj=todayWeather;
                         //mHandler.sendMessage(msg);
-                        MainActivity.mHandler.sendMessageDelayed(msg,2000);
+                        MainActivity.mHandler.sendMessage(msg);
                         Intent intent =new Intent();
                         intent.putExtra("type",todayWeather.getType());
-                        intent.putExtra("temperature",todayWeather.getHigh()+"~"+todayWeather.getLow());
+                        intent.putExtra("temperature",todayWeather.getLow()+"~"+todayWeather.getHigh());
                         intent.setAction("android.appwidget.action.APPWIDGET_UPDATE");
                         sendBroadcast(intent);
                     }

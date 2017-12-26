@@ -244,8 +244,8 @@ public class MainActivity extends Activity implements View.OnClickListener, View
                         Message msg =new Message();
                         msg.what = UPDATE_TODAY_WEATHER;
                         msg.obj=todayWeather;
-                        //mHandler.sendMessage(msg);
-                        mHandler.sendMessageDelayed(msg,2000);
+                        mHandler.sendMessage(msg);
+                        //mHandler.sendMessageDelayed(msg,2000);
                     }
                 }catch (Exception e){
                     e.printStackTrace();
@@ -428,7 +428,7 @@ public class MainActivity extends Activity implements View.OnClickListener, View
         pmDataTv.setText(todayWeather.getPm25()==null?"N/A":todayWeather.getPm25());
         pmQualityTv.setText(todayWeather.getQuality()==null?"N/A":todayWeather.getQuality());
         weekTv.setText(todayWeather.getDate());
-        temperatureTv.setText(todayWeather.getHigh()+"~"+todayWeather.getLow());
+        temperatureTv.setText(todayWeather.getLow()+"~"+todayWeather.getHigh());
         climateTv.setText(todayWeather.getType());
         windTv.setText("风力:"+todayWeather.getFengli());
 
@@ -467,7 +467,7 @@ public class MainActivity extends Activity implements View.OnClickListener, View
             ImageView weatherImg = (ImageView) view.findViewById(R.id.weather_img);
 
             dateTv.setText(weather.getDate()==null?"null":weather.getDate());
-            temperatureTv.setText((weather.getHigh()==null?"null":weather.getHigh())+"~"+(weather.getLow()==null?"null":weather.getLow()));
+            temperatureTv.setText((weather.getLow()==null?"null":weather.getLow())+"~"+(weather.getHigh()==null?"null":weather.getHigh()));
             climateTv.setText(weather.getType()==null?"null":weather.getType());
             windTv.setText(weather.getFengli()==null?"null":weather.getFengli());
             if(weather.getType()!=null)
@@ -489,10 +489,9 @@ public class MainActivity extends Activity implements View.OnClickListener, View
             ImageView weatherImg = (ImageView) view.findViewById(R.id.weather_img);
 
             dateTv.setText(weather.getDate());
-            temperatureTv.setText(weather.getHigh()+"~"+weather.getLow());
+            temperatureTv.setText(weather.getLow()+"~"+weather.getHigh());
             climateTv.setText(weather.getType());
             windTv.setText(weather.getFengli());
-            Log.d("qqq",weather.getFengli());
             if(weather.getType()!=null)
                 weatherImg.setImageResource(weatherMap.get("晴"));
 
