@@ -34,6 +34,7 @@ public class MyService extends Service {
 
     private static final int UPDATE_TODAY_WEATHER = 1;
     String cityCode;
+    Boolean running = true;
     private final IBinder mBinder = new MyBinder();
 
 
@@ -60,10 +61,16 @@ public class MyService extends Service {
             return START_STICKY;
     }
 
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        running = false;
+    }
+
     class DownThread implements Runnable{
 
         public void run() {
-            while(true){
+            while(running){
                 try {
                     Thread.sleep(5000);
                     queryWeatherCode(cityCode);

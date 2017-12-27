@@ -568,4 +568,10 @@ public class MainActivity extends Activity implements View.OnClickListener, View
 //                    Toast.LENGTH_SHORT).show();
         }
     };
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        unbindService(connection);
+    }
 }

@@ -2,6 +2,7 @@ package cn.edu.pku.hongbenyun.miniweather;
 
 import android.app.Activity;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.v4.view.ViewPager;
 import android.view.LayoutInflater;
@@ -30,6 +31,20 @@ public class Guide extends Activity implements ViewPager.OnPageChangeListener{
         super.onCreate(savedInstanceState);
         setContentView(R.layout.guide);
 
+        SharedPreferences sharedPreferences = getSharedPreferences("config", MODE_PRIVATE);
+        String introductionPage = sharedPreferences.getString("introductionPage","0");
+        if(introductionPage.equals("1"))
+        {
+            Intent i = new Intent(Guide.this,MainActivity.class);
+            startActivity(i);
+            finish();
+        }
+        else
+        {
+            SharedPreferences.Editor editor = sharedPreferences.edit();
+            editor.putString("introductionPage", "1");
+            editor.commit();
+        }
         initViews();
         initDots();
 
