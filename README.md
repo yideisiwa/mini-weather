@@ -1,1 +1,2 @@
 # mini-weather
+实现了天气预报的基本功能：显示所选城市天气信息，汉字匹配或拼音匹配搜索城市，ViewPager显示未来4天天气，ViewPager实现引导页。Service每隔几秒自动更新天气信息，Service每隔几秒自动传送信息给APP Widget更新桌面小部件。
